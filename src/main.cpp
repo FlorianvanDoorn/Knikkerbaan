@@ -28,7 +28,7 @@ uint8_t BufIndex = 0;
 
 float ActPos = 0; // Actual position of the knikker, received from the sensor. This variable will be used in the control loop to adjust the speed of the motor accordingly.
  
-
+float GetPos(); // Function prototype for retrieving the actual position.
 
 void setup() 
 {
@@ -38,26 +38,39 @@ void setup()
 
 void loop() {
 
-  if (Serial.available() > 0) 
-  {
-    char inChar = Serial.read(); // Read the incoming byte.
 
-    if (inChar == START_CHAR) 
-    {
-      BufIndex = 0; // Reset buffer index when start character is received.
+  ActPos = GetPos(); // Call the function to get the actual position of the knikker.
+  Serial.print("Actual Position: ");
+  Serial.println(ActPos); // Print the actual position to the serial monitor for debugging purposes
+
+
+
+}
+
+
+float GetPos() 
+{
+  static bool receiving = false;
+  static float Pos = 0.0; // veiliger dan 0
+
+  while (Serial.available())
+  {
+    char inChar = Serial.read();
+
+    if (inChar == START_CHAR) {
+      BufIndex = 0;
+      receiving = true;
     } 
-    else if (inChar == END_CHAR) 
-    {
-      buffer[BufIndex] = '\0'; // Null-terminate the string.
-      ActPos = atof(buffer); // Convert the buffer to a float and store it in ActPos.
-      Serial.print("Received Position: ");
-      Serial.println(ActPos); // Log the received position for debugging.
+    else if (inChar == END_CHAR && receiving) {
+      buffer[BufIndex] = '\0';
+      Pos = atof(buffer);
+      receiving = false;
+      return Pos;
     } 
-    else if (BufIndex < sizeof(buffer) - 1) 
-    {
-      buffer[BufIndex++] = inChar; // Add character to buffer and increment index.
+    else if (receiving && BufIndex < sizeof(buffer) - 1) {
+      buffer[BufIndex++] = inChar;
     }
   }
 
-
+  return Pos;
 }
