@@ -44,8 +44,11 @@ float         PrevSample[20];
 float         TauDistance     = 6;  // Time constant for first order filter. [5]
 float         TauSpeed        = 10;  // Time constant for first order filter. [15]
 
-
-
+// Define communication variables.
+#define START_CHAR '$'
+#define END_CHAR   '*'
+char buffer[32];
+uint8_t BufIndex = 0;
 
 // PID variables.
 float         Error         = 0.0;  // Actual difference between Desired and actual position.
@@ -68,6 +71,7 @@ void  DistFilter();
 void  FirstOrderDistanceFilter();
 void  FirstOrderSpeedFilter();
 void  CalculateSpeed();
+float GetPos();
 
 
 void setup() 
@@ -84,6 +88,8 @@ void setup()
 
 void loop()
 {
+  // Call function to read Actual position from serial input.
+  ActPos = GetPos();
 
   // Calculate error.
   Error = DesirPos - ActPos;
@@ -108,19 +114,19 @@ void loop()
   //Serial.println(String (voltage));
 
   // Call Function for scaling sensor signal.
-  SensMapping();
+  //SensMapping();
 
   // Call Function for calculating actual speed.
-  CalculateSpeed();
+  //CalculateSpeed();
 
   // Call Function for Filtering sensor signal.
   //DistFilter();
 
   // Call Function for Filtering sensor signal with a first order filter.
-  FirstOrderDistanceFilter();
+  //FirstOrderDistanceFilter();
 
   // Call Function for Filtering speed signal with a first order filter.
-  FirstOrderSpeedFilter();
+  //FirstOrderSpeedFilter();
 
  
 
@@ -247,4 +253,31 @@ void CalculateSpeed(){
   }
 
 
+}
+
+float GetPos() 
+{
+  static bool receiving = false;
+  static float Pos = 0.0; // veiliger dan 0
+
+  while (Serial.available())
+  {
+    char inChar = Serial.read();
+
+    if (inChar == START_CHAR) {
+      BufIndex = 0;
+      receiving = true;
+    } 
+    else if (inChar == END_CHAR && receiving) {
+      buffer[BufIndex] = '\0';
+      Pos = atof(buffer);
+      receiving = false;
+      return Pos;
+    } 
+    else if (receiving && BufIndex < sizeof(buffer) - 1) {
+      buffer[BufIndex++] = inChar;
+    }
+  }
+
+  return Pos;
 }
