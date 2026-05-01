@@ -25,12 +25,12 @@
 
 
 // Define global variables.
-float   DesirPos      = 100.0;  
-//float         voltage       = 0.0;
-float   ActPos        = 0.0;
-float   RawDist       = 0.0;
-double  ActSpeed      = 0.0;
-double  ActRawSpeed   = 0.0;
+float   DesirPos      = 100.0;  // Desired position of the knikker in centimeters.
+//float   voltage       = 0.0;    // Voltage value read from the sensor in volts.
+float   ActPos        = 0.0;    // Actual position of the knikker in centimeters.
+float   RawDist       = 0.0;    // Raw distance value from the sensor in centimeters.
+double  ActSpeed      = 0.0;    // Actual speed of the knikker in centimeters per second.
+double  ActRawSpeed   = 0.0;    // Actual raw speed of the knikker in centimeters per second.
 
 
 
@@ -62,6 +62,10 @@ const float   g             = 9.81;
 uint32_t DutyMin = 1638;  // ≈ 0.5 ms
 uint32_t DutyMax = 8192;  // ≈ 2.5 ms
 
+// Define communication variables.
+char line[32];
+int index = 0;
+
 // Define function 
 void  SensMapping();
 void  DistFilter();
@@ -84,6 +88,26 @@ void setup()
 
 void loop()
 {
+  while (Serial.available()) {
+
+    char c = Serial.read();
+
+    if (c == '\n') {
+      line[index] = '\0';
+
+
+      if (sscanf(line, "$P,%d*", &ActPos) == 1) {
+        // ✔ geldige waarde ontvangen
+        // gebruik 'pos' voor jouw regeling
+      }
+
+      index = 0; // reset buffer
+    } else {
+        if (index < sizeof(line) - 1) {
+            line[index++] = c;
+        }
+    }
+  }
 
   // Calculate error.
   Error = DesirPos - ActPos;
@@ -117,7 +141,7 @@ void loop()
   //DistFilter();
 
   // Call Function for Filtering sensor signal with a first order filter.
-  FirstOrderDistanceFilter();
+  //FirstOrderDistanceFilter();
 
   // Call Function for Filtering speed signal with a first order filter.
   FirstOrderSpeedFilter();
