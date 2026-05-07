@@ -52,7 +52,7 @@ uint8_t BufIndex = 0;
 
 // PID variables.
 float         Error         = 0.0;  // Actual difference between Desired and actual position.
-float         Kp            = 0.035; // Proportional cotroller variable. [0.02]
+float         Kp            = 0.035; // Proportional cotroller variable. [0.035]
 float         Td            = 0.6;  // Differentiating controller variable. [0.6] 
 unsigned  int DesirAngle    = 0;    // Result of controller.
 
@@ -95,21 +95,21 @@ void loop()
   Error = DesirPos - ActPos;
 
   // Calculate Desired Angle of knikkerbaan.
-  DesirAngle = (Error - ActSpeed * Td) * Kp * g;
+  DesirAngle = (Error - ActSpeed * Td) * Kp * g;  // (Error - ActSpeed * Td) * Kp * g
 
     
   // Send servo to desired angle.
   ledcWrite(ServoChannel, (DutyMin + ((DutyMax - DutyMin) * (88 - DesirAngle) / 180)));
 
-  Serial.print(">RawPosition: ");
-  Serial.println(RawDist);
-  Serial.print(">ActualPosition: ");
-  Serial.println(ActPos);
+  // Serial.print(">RawPosition: ");
+  // Serial.println(RawDist);
+  // Serial.print(">ActualPosition: ");
+  // Serial.println(ActPos);
 
-  Serial.print(">RawSpeed: ");
-  Serial.println(ActRawSpeed);
-  Serial.print(">ActualSpeed: ");
-  Serial.println(ActSpeed);
+  // Serial.print(">RawSpeed: ");
+  // Serial.println(ActRawSpeed);
+  // Serial.print(">ActualSpeed: ");
+  // Serial.println(ActSpeed);
 
   //Serial.println(String (voltage));
 
@@ -117,7 +117,7 @@ void loop()
   //SensMapping();
 
   // Call Function for calculating actual speed.
-  //CalculateSpeed();
+  CalculateSpeed();
 
   // Call Function for Filtering sensor signal.
   //DistFilter();
@@ -126,7 +126,7 @@ void loop()
   //FirstOrderDistanceFilter();
 
   // Call Function for Filtering speed signal with a first order filter.
-  //FirstOrderSpeedFilter();
+  FirstOrderSpeedFilter();
 
  
 
@@ -271,6 +271,8 @@ float GetPos()
     else if (inChar == END_CHAR && receiving) {
       buffer[BufIndex] = '\0';
       Pos = atof(buffer);
+      Serial.print(">Received Position: ");
+      Serial.println(Pos);
       receiving = false;
       return Pos;
     } 
