@@ -1,19 +1,28 @@
+// +----------------------------------------------------------------------------------+
+// | Project:      Knikkerbaan Regelsysteem                                           |
+// | Bestand:      Knikkerbaan.ino                                                    |
+// | Auteur:       Florian van Doorn                                                  |
+// | Opleiding:    Mechatronica - Avans Hogeschool Breda                              |
+// | Datum:        28-05-2026                                                         |
+// | Versie:                                                                          |
+// |                                                                                  |
+// | Beschrijving:                                                                    |
+// | Stuurt commando's naar de servo motor op basis van de PID regelkring             |
+// |                                                                                  |
+// | Functionaliteit:                                                                 |
+// | - Regelkring                                                                     |
+// | - PID regelaar                                                                   |
+// | - Sensor ingangsdata verschaling                                                 |
+// | - Data filtering                                                                 |  
+// | -                                                                                |
+// |                                                                                  |
+// | Libraries:                                                                       |
+// | - Arduino.h                                                                      |
+// |                                                                                  |
+// +----------------------------------------------------------------------------------+
 
-// +--------------------------------------------------------------------------------------------------+
-// | Knikkerbaan.ino                                                                                  |
-// |                                                                                                  |
-// | F. van Doorn                                                                                     |
-// | Student Nr. 2223288                                                                              |
-// | Academie voor Deeltijd                                                                           |
-// | Avans Hogeschool Breda                                                                           |
-// |                                                                                                  |
-// | Knikkerbaan met Goede filtereigenschappen en een werkende regelkring.                            |
-// |                                                                                                  |
-// | Libraries:                                                                                       |
-// |  - Arduino.h                                                                                     | 
-// |                                                                                                  |
-// | v0.1 - 07.02.2026                                                                                |
-// +--------------------------------------------------------------------------------------------------+
+
+
 
 #include <Arduino.h>
 
@@ -47,6 +56,7 @@ float         TauSpeed        = 10;  // Time constant for first order filter. [1
 // Define communication variables.
 #define START_CHAR '$'
 #define END_CHAR   '*'
+#define DELIMITER  ','
 char buffer[32];
 uint8_t BufIndex = 0;
 
@@ -259,6 +269,7 @@ float GetPos()
 {
   static bool receiving = false;
   static float Pos = 0.0; // veiliger dan 0
+  String VariableName;
 
   while (Serial.available())
   {
@@ -276,6 +287,13 @@ float GetPos()
       receiving = false;
       return Pos;
     } 
+    else if (inChar ==  DELIMITER && receiving) {
+      buffer[BufIndex] = '\0';
+      VariableName = String(buffer);
+      Serial.print(">Received Variable Name: ");
+      Serial.println(VariableName);
+      BufIndex = 0; // reset buffer index for next variable
+    }
     else if (receiving && BufIndex < sizeof(buffer) - 1) {
       buffer[BufIndex++] = inChar;
     }
