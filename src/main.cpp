@@ -81,7 +81,7 @@ void  DistFilter();
 void  FirstOrderDistanceFilter();
 void  FirstOrderSpeedFilter();
 void  CalculateSpeed();
-float GetPos();
+void  GetData();
 
 
 void setup() 
@@ -99,7 +99,7 @@ void setup()
 void loop()
 {
   // Call function to read Actual position from serial input.
-  ActPos = GetPos();
+  GetData();
 
   // Calculate error.
   Error = DesirPos - ActPos;
@@ -265,10 +265,9 @@ void CalculateSpeed(){
 
 }
 
-float GetPos() 
+void GetData() 
 {
   static bool receiving = false;
-  static float Pos = 0.0; // veiliger dan 0
   String VariableName;
 
   while (Serial.available())
@@ -281,17 +280,46 @@ float GetPos()
     } 
     else if (inChar == END_CHAR && receiving) {
       buffer[BufIndex] = '\0';
-      Pos = atof(buffer);
-      Serial.print(">Received Position: ");
-      Serial.println(Pos);
-      receiving = false;
-      return Pos;
+      if (VariableName == "Actpos") {
+        ActPos = atof(buffer);
+        Serial.print(">Received Position: ");
+        Serial.println(ActPos);
+        receiving = false;
+        return;
+      }
+      else if (VariableName == "Desirpos") {
+        DesirPos = atof(buffer);
+        Serial.print(">Received Desired Position: ");
+        Serial.println(DesirPos);
+        receiving = false;
+        return;
+      }
+      else if (VariableName == "Kp") {
+        Kp = atof(buffer);
+        Serial.print(">Received Kp: ");
+        Serial.println(Kp);
+        receiving = false;
+        return;
+      }
+      else if (VariableName == "Td") {
+        Td = atof(buffer);
+        Serial.print(">Received Td: ");
+        Serial.println(Td);
+        receiving = false;
+        return;
+      }
+      else {
+        Serial.print(">Unknown Variable Name: ");
+        Serial.println(VariableName);
+        receiving = false;
+        return;
+      }
+
+
     } 
     else if (inChar ==  DELIMITER && receiving) {
       buffer[BufIndex] = '\0';
       VariableName = String(buffer);
-      Serial.print(">Received Variable Name: ");
-      Serial.println(VariableName);
       BufIndex = 0; // reset buffer index for next variable
     }
     else if (receiving && BufIndex < sizeof(buffer) - 1) {
@@ -299,5 +327,5 @@ float GetPos()
     }
   }
 
-  return Pos;
+  return;
 }
