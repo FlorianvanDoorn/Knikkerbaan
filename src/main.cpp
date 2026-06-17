@@ -46,7 +46,7 @@ unsigned int SampleAmount = 3; // Amount of samples used to filter the input sig
 int SpeedSampleTime = 1;       // Sample time for speed calculation in ms. [3]
 float PrevSample[20];
 float TauDistance = 10; // Time constant for first order filter. [5]
-float TauSpeed = 15;    // Time constant for first order filter. [15]
+float TauSpeed = 10;    // Time constant for first order filter. [15]
 
 // Define communication variables.
 #define START_CHAR '$'
@@ -75,7 +75,7 @@ void DistFilter();
 void FirstOrderDistanceFilter();
 void FirstOrderSpeedFilter();
 void CalculateSpeed();
-void GetData();
+void GetData(int mode);
 
 void setup()
 {
@@ -113,21 +113,19 @@ void loop()
   // Serial.println(String (voltage));
 
   // Call function to read Actual position from serial input.
-  GetData();
+  GetData(Mode);
+
+  // Call Function for scaling sensor signal.
+  SensMapping();
 
   if (Mode == 0)
   {
-
-    // Call Function for scaling sensor signal.
-    SensMapping();
-
-    // Call Function for Filtering sensor signal.
+    // Call Function for Filtering sensor signal with a moving average filter.
     // DistFilter();
 
     // Call Function for Filtering sensor signal with a first order filter.
     FirstOrderDistanceFilter();
   }
-
   // Call Function for calculating actual speed.
   CalculateSpeed();
 
@@ -253,7 +251,7 @@ void CalculateSpeed()
   }
 }
 
-void GetData()
+void GetData(int mode)
 {
   static bool receiving = false;
   String VariableName;
@@ -270,7 +268,7 @@ void GetData()
     else if (inChar == END_CHAR && receiving)
     {
       buffer[BufIndex] = '\0';
-      if (VariableName == "Actpos")
+      if (VariableName == "Actpos" && mode == 1)
       {
         ActPos = atof(buffer);
         Serial.print(">Received Position: ");
