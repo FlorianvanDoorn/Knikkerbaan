@@ -100,15 +100,15 @@ void loop()
   // Send servo to desired angle.
   ledcWrite(ServoChannel, (DutyMin + ((DutyMax - DutyMin) * (88 - DesirAngle) / 180)));
 
-  // Serial.print(">RawPosition: ");
-  // Serial.println(RawDist);
-  // Serial.print(">ActualPosition: ");
-  // Serial.println(ActPos);
+  Serial.print(">RawPosition: ");
+  Serial.println(RawDist);
+  Serial.print(">ActualPosition: ");
+  Serial.println(ActPos);
 
-  // Serial.print(">RawSpeed: ");
-  // Serial.println(ActRawSpeed);
-  // Serial.print(">ActualSpeed: ");
-  // Serial.println(ActSpeed);
+  Serial.print(">RawSpeed: ");
+  Serial.println(ActRawSpeed);
+  Serial.print(">ActualSpeed: ");
+  Serial.println(ActSpeed);
 
   // Serial.println(String (voltage));
 
@@ -122,7 +122,7 @@ void loop()
     SensMapping();
 
     // Call Function for Filtering sensor signal.
-    DistFilter();
+    // DistFilter();
 
     // Call Function for Filtering sensor signal with a first order filter.
     FirstOrderDistanceFilter();
