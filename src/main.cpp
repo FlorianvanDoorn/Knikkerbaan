@@ -41,12 +41,12 @@ int Mode = 0; // 0 = Sensor, 1 = Vision
 int ServoChannel = 0;
 
 // Define filter variables.
-unsigned int SampleTime = 1;    // Sample time in ms. [1]
-unsigned int SampleAmount = 20; // Amount of samples used to filter the input signal. 4+1=5 zero counts as one sample position. [3]
-int SpeedSampleTime = 1;        // Sample time for speed calculation in ms. [3]
+unsigned int SampleTime = 1;   // Sample time in ms. [1]
+unsigned int SampleAmount = 3; // Amount of samples used to filter the input signal. 4+1=5 zero counts as one sample position. [3]
+int SpeedSampleTime = 1;       // Sample time for speed calculation in ms. [3]
 float PrevSample[20];
-float TauDistance = 6; // Time constant for first order filter. [5]
-float TauSpeed = 10;   // Time constant for first order filter. [15]
+float TauDistance = 10; // Time constant for first order filter. [5]
+float TauSpeed = 15;    // Time constant for first order filter. [15]
 
 // Define communication variables.
 #define START_CHAR '$'
